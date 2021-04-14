@@ -1,0 +1,81 @@
+﻿This simulation code package is mainly used to reproduce the results of the following paper [1]:
+
+[1] C. Hu, X. Wang, L. Dai, and J. Ma, "Partially coherent compressive phase retrieval for millimeter-wave massive MIMO channel estimation," IEEE Trans. Signal Process., vol. 68, pp. 1673-1687, 2020.
+
+*********************************************************************************************************************************
+If you use this simulation code package in any way, please cite the original paper [1] above. 
+ 
+The author in charge of this simulation code pacakge is: Chen Hu (email: huc16@mails.tsinghua.edu.cn).
+
+Reference: We highly respect reproducible research, so we try to provide the simulation codes for our published papers (more information can be found at: 
+http://oa.ee.tsinghua.edu.cn/dailinglong/publications/publications.html). 
+
+Please note that the MATLAB R2012a is used for this simulation code package,  and there may be some imcompatibility problems among different MATLAB versions. 
+
+Copyright reserved by the Broadband Communications and Signal Processing Laboratory (led by Dr. Linglong Dai), Beijing National Research Center for Information Science and Technology (BNRist), Department of Electronic Engineering, Tsinghua University, Beijing 100084, China. 
+
+*********************************************************************************************************************************
+Abstract of the paper: 
+
+Channel estimation is an important yet challenging
+problem for millimeter-wave (mmWave) massive MIMO systems.
+Leveraging the spatial sparsity of mmWave channels, compressive
+sensing (CS) based channel estimation methods have been extensively
+studied. However, the mmWave hardware imperfections
+may introduce random phase distortions to the received pilots,
+and thus make the conventional CS methods fail to estimate
+the channel. To this end, the compressive phase retrieval (CPR)
+method can be employed to solve this challenging problem. In
+this paper, we exploit the partial coherence in hybrid mmWave
+systems, i.e., the pilots sent from different radio frequency (RF)
+chains share the same phase distortion in the same time frame,
+while the phase distortions are different across different time
+frames. Based on this property, we propose an on-grid partially
+coherent CPR (PC-CPR) algorithm for mmWave channel estimation
+in the presence of severe phase distortions. Unlike the existing
+coherent channel estimation schemes that require perfect phase
+information and the noncoherent channel estimation schemes
+that ignore all the phases of the measurements, the proposed
+on-grid PC-CPR algorithm exploits the above partial coherence
+property to estimate the sparse angle-domain channel vector.
+Furthermore, to solve the resolution limitation of the on-grid PCCPR
+algorithm, we propose an off-grid PC-CPR algorithm that
+directly estimates the parameters of channel paths. The proposed
+partially coherent channel estimation framework subsumes the
+existing coherent and noncoherent channel estimation methods
+as special cases. Simulation results show that under the presence
+of random phase distortions, the proposed PC-CPR algorithms
+outperform noncoherent channel estimation methods with higher
+reliability and lower pilot overhead by leveraging the partial
+coherence.
+
+
+*********************************************************************************************************************************
+How to use this simulation code package?
+
+1. Open folder "load and plot" and run "load_and_plot.m", you will see the results in our paper in a second. It will load the data and plot the results.
+
+2. Run "CompareInitializationSchemes.m", then you will run Monte-Carlo simulations to see the comparison of different initialization schemes.
+
+3. Run "NRFcurves.m", then you will run Monte-Carlo simulations to see the performances against different number of RF chains.
+
+4. Run "SNRcurves.m" (or "SNRcurves_MU.m"), then you will run Monte-Carlo simulations to see the performances against different SNR for a single user (or for multi-users).
+
+5. Run "SuccessRateVsM.m", then you will run Monte-Carlo simulations to see the performances against M, i.e., the number of measurements.
+
+6. If you want to change the system setup, you can modify "SystemSettings.m". Some basic parameters such as the number of antennas and the number of Monte-Carlo trials are defined in this file.
+
+7. If you want to modify some of the algorithm parameters (pre-set parameters in the algorithms), you can edit "MyDefaultOptions.m". 
+
+8. The on-grid PC-CPR and off-grid PC-CPR fucntions are in "PCCPR_UPA.m" and "PCCPR_SR_UPA.m", respectively. The input of these two functions are the received pilots and some settings, and the output is the estimated channel.
+
+9. "InitGuess_UPA.m" is the proposed initialization method. "InitGuess_1.m" and "InitGuess_2.m" are two benchmark methods.
+
+10. "RandomChannel_UPA.m" is what we use to generate the channels.
+
+11. "SE_rotate.m" is used to evaluate the squared error under the existence of the global phase ambiguity.
+
+11. "Gradient_2D_once.m", "CRAF.m", "CRAF_CE.m", "Gradient_2D_once.m", "NOMP_2D.m", "NOMP_2D_once.m", "OMP.m" are used for comparison or auxilliary functions. You do not need to pay much attension to these functions.
+
+*********************************************************************************************************************************
+Enjoy the reproducible research!

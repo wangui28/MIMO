@@ -1,0 +1,24 @@
+m=[0 8 16 24 32 40 48 56 64];
+Sr1=[0 0.012 0.046 0.82 0.95 1 1 1 1];
+Sr2=[0 0.042 0.15 0.96 1 1 1 1 1];
+Sr3=[0 0.063 0.29 0.98 1 1 1 1 1];
+Avr1=[0 1.15 2.56 32 36.25 37.56 39.12 40.25 41.32];
+Avr2=[0 2.35 5.12 35.19 40.01 40.25 41.14 42.25 43.32];
+Avr3=[0 2.54 8.31 37.25 41.25 43.12 43.75 44.32 44.58];
+figure(1);
+plot(m,Sr1,'-*b'); hold on;
+plot(m,Sr2,'-or'); hold on;
+plot(m,Sr3,'-^g');
+set(gca,'XTick',0:8:64); 
+set(gca,'YTick',0:0.1:1); 
+legend('N=64','N=96','N=128');
+xlabel('测量信号数M');ylabel('成功率');grid on;
+
+figure(2);
+plot(m,Avr1,'-*b');hold on;
+plot(m,Avr2,'-or');hold on;
+plot(m,Avr3,'-^g');
+set(gca,'XTick',0:8:64); 
+set(gca,'YTick',0:5:45);
+legend('N=64','N=96','N=128');
+xlabel('测量信号数M');ylabel('重构信噪比(dB)');grid on;
