@@ -6,7 +6,7 @@ function [ sys ] = SystemSettings(M, N_RF, SNR)
     
     sys.M = M;                      % the number of measurements
     sys.N1 = 32;                    % UPA size in dim 1
-    sys.N2 = 16;                    % UPA size in dim 2
+    sys.N2 = 32;                    % UPA size in dim 2
     sys.N = sys.N1*sys.N2;          % total number of antennas
     sys.block_size = N_RF;          % number of RF chains /size of phase structure block
     sys.L = 5;                      % number of paths

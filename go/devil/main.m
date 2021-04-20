@@ -1,71 +1,74 @@
-clc;clear all;close all;
+clc;close all;clear all;
 
-sys=SystemSet();
-Nt = sys.Nt; %发射天线数
-Nr = sys.Nr; %接收天线数
-Nx = sys.Nx; %发射导频数
-Ny = sys.Ny; %接收导频数
-L = sys.L; %路径数
+Nt = 32; % 发射天线数
+Nr = 32; % 接收天线数
+Nx = 16; % 发射导频数
+Ny = 16; % 接收导频数
+L = 5; % 路径数
+sys = SystemSet(Nt, Nr, Nx, Ny, L);
+alg = AlgorithmSet(sys);
 
-N_trial = 2;
-
-SNR_list = -30:5:0; %信噪比取值
+SNR_list = -30:5:0; % SNR
 SNR_list_size = numel(SNR_list);
 
-h_norm = zeros(N_trial, 1);
-NMSE_PCCPR_SR = zeros(SNR_list_size, N_trial, sys.T2+1, 1);
+N_trial = 2;
+K = sys.Nx;
 
-%% try Monte-Carlo simulations for N_trial instances
+%% the containers to put the results
+h_norm = zeros(N_trial, K);
+
+NMSE_PCCPR_SR = zeros(SNR_list_size, N_trial, alg.T_off+1, K);
+
+%% Monte-Carlo Simulations for N_trial instances
 for trial_idx = 1:N_trial
+         
+    C = exp(1i*2*pi*rand(sys.N, sys.M));
     
-	%% 导频编码矩阵
-	X = exp(1i*2*pi*rand(Nt, Nx)); 
-        
-	%% 组合解码矩阵
-	W = exp(1i*2*pi*rand(Nr, Ny));
-        
-	C = kron(X.',W'); %NxNy * NtNr
+    % 相位偏移
+    phase_l = 2*pi*rand(sys.Nx, K);
+    phase = zeros(sys.M, K);
+    for k_idx = 1:K
+        for block_idx = 1:sys.Nx
+            phase((block_idx-1)*sys.Ny+1:block_idx*sys.Ny,k_idx) = phase_l(block_idx, k_idx)*ones(sys.Ny, 1);
+        end
+    end
+%     phase_noncoherent = 2*pi*rand(sys.M, K);
     
-%     % generate random structured phase offsets
-%     phase_1 = 2*pi*rand(1);
-%     phase_11 = zeros(sys.M,1);
-%     for i=1:sys.M
-%         phase_11(i)=phase_1;
-%     end
-%     phase = diag(phase_11);
-    phase_l = 2*pi*rand(sys.block, 1);
-    phase = zeros(sys.M, 1);
-    for block_idx = 1:sys.block
-        phase((block_idx-1)*sys.size+1:block_idx*sys.size,1) = phase_l(block_idx, 1)*ones(sys.size, 1);
+    % 信道建模
+    H = zeros(sys.N, K);
+    for k_idx = 1:K
+        [h, alpha, theta_t, theta_r] = Channel(sys.Nr, sys.Nt, sys.L);
+        H(:,k_idx) = h;
+        h_norm(trial_idx, k_idx) = norm(h);
     end
     
-    [h, alpha, theta_t, theta_r] = Channel(Nr, Nt, L); % 信道
-    h_norm(trial_idx, :) = norm(h);
-    
-    %% 对每一个信噪比值循环
+    %% go through all SNR's
     for SNR_idx = 1:SNR_list_size
         
         SNR = SNR_list(SNR_idx);
     
         disp(['trial=', num2str(trial_idx), '    SNR=', num2str(SNR)]);  %窗口显示仿真进度
     
-        %% 初始化噪声
-        noise = 10^(-SNR/10)/Nx/Ny;
-        n = sqrt(noise/2)*(normrnd(0, 1, Ny*Nx, Ny*Nx) + 1i*normrnd(0, 1, Ny*Nx, Ny*Nx)); %复噪声矩阵
+        % 噪声
+        noise = 10^(-SNR/10)/sys.Nx;
+        n = sqrt(noise/2)*(normrnd(0, 1, sys.M, K)+1i*normrnd(0, 1, sys.M, K)); %复噪声矩阵
         
-        y = (C*h).*exp(1i*phase(:,1)) + n(:,1);
+        for k_idx = 1:K
+            h = H(:,k_idx);
+            y = (C'*h).*exp(1i*phase(:,k_idx)) + n(:,k_idx);
         
-        h0 = Initialization(y, C, sys);
-        [h_PCCPR_SR_list] = PCCPR_SR_ULA(y, C, h0, sys);
+            h0 = Initialization(y, C, sys, alg);
+            [h_PCCPR_SR_list] = PCCPR_OffGrid(y, C, h0, sys, alg);
         
-        NMSE_list = NMSE_rotate(h_PCCPR_SR_list, h);
-        NMSE_PCCPR_SR(SNR_idx, trial_idx, :, :) = NMSE_list;
+            NMSE_list = NMSE_rotate(h_PCCPR_SR_list, h);
+            NMSE_PCCPR_SR(SNR_idx, trial_idx, :, k_idx) = NMSE_list;
+        end
     end     
 end
 
+%% calculate the NMSE
 NMSE_PCCPR_SR = sum(sum(squeeze(NMSE_PCCPR_SR(:,:,end,:)),2),3)/sum(sum(h_norm.^2));
 
 figure;
 semilogy(SNR_list,NMSE_PCCPR_SR,'b-*','LineWidth',1.5);
-grid on;
-xlabel('SNR(dB)'); ylabel('NMSE');
+xlabel('SNR(dB)'); ylabel('NMSE');grid on;

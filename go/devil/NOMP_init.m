@@ -1,22 +1,22 @@
-function [theta_t, theta_r, alpha] = NOMP_init(order, Nt, Nr, W, r, theta_t_previous, theta_r_previous, stepscale)
+function [ theta1, theta2, alpha ] = NOMP_init(order, N1, N2, W, r, theta1_previous, theta2_previous, stepscale)
 %OMP Summary of this function goes here
 % Detailed explanation goes here
-[~,~] = size(W);
+[~, ~] = size(W);
 %P = numel(theta1_previous);
-theta_t = theta_t_previous;
-theta_r = theta_r_previous;  %初始值
+theta1 = theta1_previous;
+theta2 = theta2_previous;  %初始值
 
 delta = 1e-8;
 G = zeros(3,3);
 for i = 1:3
-    theta_t_i = theta_t + delta*(i-2);
+    theta1_i = theta1 + delta*(i-2);
     for j = 1:3
-        theta_r_j = theta_r + delta*(j-2);
-        a = kron(exp(-1i*2*pi*(0:1:(Nt-1))*theta_t_i).', exp(1i*2*pi*(0:1:(Nr-1))*theta_r_j)');
-        f = W*a;
+        theta2_j = theta2 + delta*(j-2);
+        a = kron(exp(1i*2*pi*(0:1:(N1-1))*theta1_i)', exp(1i*2*pi*(0:1:(N2-1))*theta2_j)');
+        f = W'*a;
         fr = f'*r;
         fnorm = f'*f;
-        G(i,j) = fr'*fr/fnorm;
+        G(i,j) = fr'*fr/fnorm;  
     end
 end
 I = zeros(2,1);
@@ -33,12 +33,12 @@ for i = 1:10
     HH = inv(H);
     ss = 0.5*(HH(1)+HH(2));
     if (strcmp(order,'1st'))
-        theta_new = [theta_t;theta_r]-stepscale*ss*I;
+        theta_new = [theta1;theta2]-stepscale*ss*I;
     elseif (strcmp(order,'2nd'))
-        theta_new = [theta_t;theta_r]-stepscale*inv(H)*I;
+        theta_new = [theta1;theta2]-stepscale*inv(H)*I;
     end
-    a = kron(exp(-1i*2*pi*(0:1:(Nt-1))*theta_new(1)).', exp(1i*2*pi*(0:1:(Nr-1))*theta_new(2))');
-    f = W*a;
+    a = kron(exp(1i*2*pi*(0:1:(N1-1))*theta_new(1))', exp(1i*2*pi*(0:1:(N2-1))*theta_new(2))');
+    f = W'*a;
     fr = f'*r;
     fnorm = f'*f;
     G_new = fr'*fr/fnorm;
@@ -50,12 +50,13 @@ for i = 1:10
     end
 end
 
-theta_t = theta_new(1);
-theta_r = theta_new(2);  %新的路径方向
+theta1 = theta_new(1);
+theta2 = theta_new(2);  %新的路径方向
 
-a = kron(exp(-1i*2*pi*(0:1:(Nt-1))*theta_t)', exp(1i*2*pi*(0:1:(Nr-1))*theta_r)');
-f = W*a;
+
+a = kron(exp(1i*2*pi*(0:1:(N1-1))*theta1)', exp(1i*2*pi*(0:1:(N2-1))*theta2)');
+f = W'*a;
 fr = f'*r;
 alpha = fr/norm(f,2)^2;  %新的路径增益
-end
 
+end

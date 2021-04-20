@@ -24,13 +24,12 @@ clear all;clc;close all;
 %                           which this simulation is going to test
 %       sys_default.M_list_size:    the size of the above list
 %       sys_default.N_trial;        number of Monte-Carlo trials
-%
 
-SNR_list = -30:5:30;
+SNR_list = -30:5:0;
 SNR_list_size = numel(SNR_list);
 M_default = 256;
-N_RF_default = 4;
-N_TS = 64;
+N_RF_default = 16;
+N_TS = 16;
 sys_default = SystemSettings(M_default, N_RF_default, SNR_list(1));
 options_default = MyDefaultOptions(sys_default);
 
@@ -76,8 +75,8 @@ for trial_idx = 1:sys_default.N_trial
     % generate the channel
     H = zeros(sys_default.N,K);
     for k_idx = 1:K
-         [h, theta1, theta2, alpha] = RandomChannel_UPA(sys_default);
-%         [h, theta1, theta2, alpha] = Channel_ULA(sys_default.N1, sys_default.N2, sys_default.L);
+%       [h, theta1, theta2, alpha] = RandomChannel_UPA(sys_default);
+        [h, theta1, theta2, alpha] = Channel_ULA(sys_default.N1, sys_default.N2, sys_default.L);
         H(:,k_idx) = h;
         h_norm(trial_idx, k_idx) = norm(h);
     end
